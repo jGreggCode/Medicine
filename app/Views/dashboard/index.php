@@ -311,7 +311,7 @@
                         <th>Price</th>
                         <th>Stock</th>
                         <th>Expiration Date</th>
-                        <th>Status</th>
+                        <th>Expired</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -321,7 +321,7 @@
                         <td><?= $medicine['name'] ?></td>
                         <td><?= $medicine['brand'] ?></td>
                         <td><?= $medicine['description'] ?></td>
-                        <td>$<?= number_format($medicine['price'], 2) ?></td>
+                        <td>PHP <?= number_format($medicine['price'], 2) ?></td>
                         <td><?= $medicine['stock'] ?></td>
                         <td><?= date('Y-m-d', strtotime($medicine['expirationDate'])) ?></td>
                         <td><?= $medicine['isExpired'] ?></td>
