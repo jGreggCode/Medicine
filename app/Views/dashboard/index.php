@@ -340,8 +340,6 @@
         </div>
         <ul class="nav-links">
             <li><a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a></li>
-            <li><a href="#"><i class="fas fa-user"></i> Profile</a></li>
-            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
         </ul>
         <a href="/auth/logout" class="logout-btn">
             <i class="fas fa-sign-out-alt"></i> Logout
