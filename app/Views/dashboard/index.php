@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -168,7 +169,8 @@
             margin-top: 1rem;
         }
 
-        th, td {
+        th,
+        td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid #3d3d3d;
@@ -184,7 +186,8 @@
             gap: 0.5rem;
         }
 
-        .btn-edit, .btn-delete {
+        .btn-edit,
+        .btn-delete {
             padding: 0.5rem 1rem;
             border: none;
             border-radius: 3px;
@@ -210,15 +213,79 @@
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
+            overflow-y: auto;
         }
 
         .modal-content {
             background-color: #2d2d2d;
-            margin: 5% auto;
+            margin: 2rem auto;
+            /* Changed from 5% to 2rem */
             padding: 2rem;
             border-radius: 10px;
             width: 90%;
             max-width: 800px;
+            position: relative;
+            /* Add this */
+            max-height: 90vh;
+            /* Add this */
+            overflow-y: auto;
+            /* Add this */
+        }
+
+        /* Add these new styles for better form layout */
+        .modal-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-container {
+            position: sticky;
+            /* Add this */
+            bottom: 0;
+            /* Add this */
+            background-color: #2d2d2d;
+            /* Add this */
+            padding-top: 1rem;
+            /* Add this */
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Style the buttons in the modal */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-primary {
+            background-color: #dc3545;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        /* Add custom scrollbar styles for better appearance */
+        .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: #dc3545;
+            border-radius: 4px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #c82333;
         }
 
         .form-group {
@@ -249,8 +316,19 @@
             display: none;
             z-index: 1001;
         }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
     </style>
 </head>
+
 <body>
     <div class="sidebar">
         <div class="user-info">
@@ -278,58 +356,58 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <i class="fas fa-pills"></i>
-                <h3>Total Medicines</h3>
-                <p><?= $totalMedicines ?></p>
+                <i class="fas fa-hospital-user"></i>
+                <h3>Active Patients</h3>
+                <p><?= $activePatients ?></p>
             </div>
             <div class="stat-card">
-                <i class="fas fa-boxes"></i>
-                <h3>Total Stock</h3>
-                <p><?= $totalStock ?></p>
+                <i class="fas fa-notes-medical"></i>
+                <h3>Weekly Cases</h3>
+                <p><?= $weeklyCases ?></p>
             </div>
             <div class="stat-card">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Expired Medicines</h3>
-                <p><?= $expiredMedicines ?></p>
+                <i class="fas fa-file-medical"></i>
+                <h3>Total Records</h3>
+                <p><?= $totalRecords ?></p>
             </div>
         </div>
 
         <div class="table-container">
             <div class="table-header">
                 <div class="search-bar">
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search medicines...">
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search consultations...">
                 </div>
-                <button class="btn-add" onclick="openAddModal()">Add Medicine</button>
+                <button class="btn-add" onclick="openAddModal()">New Consultation</button>
             </div>
 
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Brand</th>
-                        <th>Description</th>
-                        <th>Price</th>
-                        <th>Stock</th>
-                        <th>Expiration Date</th>
-                        <th>Expired</th>
+                        <th>Visit Date</th>
+                        <th>Patient Name</th>
+                        <th>Age/Gender</th>
+                        <th>Symptoms</th>
+                        <th>Diagnosis</th>
+                        <th>Prescribed Medicines</th>
+                        <th>Next Visit</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="medicineTable">
-                    <?php foreach ($medicines as $medicine): ?>
-                    <tr>
-                        <td><?= $medicine['name'] ?></td>
-                        <td><?= $medicine['brand'] ?></td>
-                        <td><?= $medicine['description'] ?></td>
-                        <td>PHP <?= number_format($medicine['price'], 2) ?></td>
-                        <td><?= $medicine['stock'] ?></td>
-                        <td><?= date('Y-m-d', strtotime($medicine['expirationDate'])) ?></td>
-                        <td><?= $medicine['isExpired'] ?></td>
-                        <td class="actions">
-                            <button class="btn-edit" onclick="editMedicine(<?= $medicine['id'] ?>)">Edit</button>
-                            <button class="btn-delete" onclick="deleteMedicine(<?= $medicine['id'] ?>)">Delete</button>
-                        </td>
-                    </tr>
+                <tbody id="consultationTable">
+                    <?php foreach ($consultations as $consultation): ?>
+                        <tr>
+                            <td><?= date('Y-m-d', strtotime($consultation['visit_date'])) ?></td>
+                            <td><?= $consultation['patient_name'] ?></td>
+                            <td><?= $consultation['age'] ?>/<?= $consultation['gender'] ?></td>
+                            <td><?= $consultation['symptoms'] ?></td>
+                            <td><?= $consultation['diagnosis'] ?></td>
+                            <td><?= $consultation['prescribed_medicines'] ?></td>
+                            <td><?= $consultation['next_visit'] ? date('Y-m-d', strtotime($consultation['next_visit'])) : 'N/A' ?></td>
+                            <td class="actions">
+                                <button class="btn-edit" onclick="editConsultation(<?= $consultation['id'] ?>)">Edit</button>
+                                <button class="btn-delete" onclick="deleteConsultation(<?= $consultation['id'] ?>)">Delete</button>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -337,34 +415,55 @@
     </div>
 
     <!-- Add/Edit Modal -->
-    <div id="medicineModal" class="modal">
+    <div id="consultationModal" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitle">Add Medicine</h2>
-            <form id="medicineForm">
-                <input type="hidden" id="medicineId">
+            <h2 id="modalTitle">New Consultation</h2>
+            <form id="consultationForm">
+                <input type="hidden" id="consultationId">
                 <div class="form-group">
-                    <label for="name">Medicine Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <label for="patient_name">Patient Name</label>
+                    <input type="text" class="form-control" id="patient_name" name="patient_name" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select class="form-control" id="gender" name="gender" required>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea class="form-control" id="description" name="description" required></textarea>
+                    <label for="contact_number">Contact Number</label>
+                    <input type="text" class="form-control" id="contact_number" name="contact_number">
                 </div>
                 <div class="form-group">
-                    <label for="brand">Brand</label>
-                    <input type="text" class="form-control" id="brand" name="brand" required>
+                    <label for="symptoms">Symptoms</label>
+                    <textarea class="form-control" id="symptoms" name="symptoms" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="price">Price</label>
-                    <input type="number" step="0.01" class="form-control" id="price" name="price" required>
+                    <label for="diagnosis">Diagnosis</label>
+                    <textarea class="form-control" id="diagnosis" name="diagnosis" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="stock">Stock</label>
-                    <input type="number" class="form-control" id="stock" name="stock" required>
+                    <label for="treatment">Treatment Plan</label>
+                    <textarea class="form-control" id="treatment" name="treatment" required></textarea>
                 </div>
                 <div class="form-group">
-                    <label for="expirationDate">Expiration Date</label>
-                    <input type="date" class="form-control" id="expirationDate" name="expirationDate" required>
+                    <label for="prescribed_medicines">Prescribed Medicines</label>
+                    <textarea class="form-control" id="prescribed_medicines" name="prescribed_medicines" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Additional Notes</label>
+                    <textarea class="form-control" id="notes" name="notes"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="next_visit">Next Visit Date</label>
+                    <input type="date" class="form-control" id="next_visit" name="next_visit">
                 </div>
                 <div class="btn-container">
                     <button type="submit" class="btn btn-primary">Save</button>
@@ -381,40 +480,44 @@
         // Search functionality
         $('#searchInput').on('keyup', function() {
             const searchTerm = $(this).val().toLowerCase();
-            $('#medicineTable tr').each(function() {
+            $('#consultationTable tr').each(function() {
                 const text = $(this).text().toLowerCase();
                 $(this).toggle(text.indexOf(searchTerm) > -1);
             });
         });
 
         function openAddModal() {
-            $('#modalTitle').text('Add Medicine');
-            $('#medicineId').val('');
-            $('#medicineForm')[0].reset();
-            $('#medicineModal').show();
+            $('#modalTitle').text('New Consultation');
+            $('#consultationId').val('');
+            $('#consultationForm')[0].reset();
+            $('#consultationModal').show();
         }
 
         function closeModal() {
-            $('#medicineModal').hide();
+            $('#consultationModal').hide();
         }
 
-        function editMedicine(id) {
-            $.get(`/medicine/get/${id}`, function(medicine) {
-                $('#modalTitle').text('Edit Medicine');
-                $('#medicineId').val(medicine.id);
-                $('#name').val(medicine.name);
-                $('#description').val(medicine.description);
-                $('#brand').val(medicine.brand);
-                $('#price').val(medicine.price);
-                $('#stock').val(medicine.stock);
-                $('#expirationDate').val(medicine.expirationDate.split(' ')[0]);
-                $('#medicineModal').show();
+        function editConsultation(id) {
+            $.get(`/consultation/get/${id}`, function(consultation) {
+                $('#modalTitle').text('Edit Consultation');
+                $('#consultationId').val(consultation.id);
+                $('#patient_name').val(consultation.patient_name);
+                $('#age').val(consultation.age);
+                $('#gender').val(consultation.gender);
+                $('#contact_number').val(consultation.contact_number);
+                $('#symptoms').val(consultation.symptoms);
+                $('#diagnosis').val(consultation.diagnosis);
+                $('#treatment').val(consultation.treatment);
+                $('#prescribed_medicines').val(consultation.prescribed_medicines);
+                $('#notes').val(consultation.notes);
+                $('#next_visit').val(consultation.next_visit ? consultation.next_visit.split(' ')[0] : '');
+                $('#consultationModal').show();
             });
         }
 
-        function deleteMedicine(id) {
-            if (confirm('Are you sure you want to delete this medicine?')) {
-                $.post(`/medicine/delete/${id}`, function(response) {
+        function deleteConsultation(id) {
+            if (confirm('Are you sure you want to delete this consultation record?')) {
+                $.post(`/consultation/delete/${id}`, function(response) {
                     if (response.status === 'success') {
                         showToast(response.message, 'success');
                         setTimeout(() => location.reload(), 1000);
@@ -425,11 +528,11 @@
             }
         }
 
-        $('#medicineForm').on('submit', function(e) {
+        $('#consultationForm').on('submit', function(e) {
             e.preventDefault();
-            const id = $('#medicineId').val();
-            const url = id ? `/medicine/update/${id}` : '/medicine/store';
-            
+            const id = $('#consultationId').val();
+            const url = id ? `/consultation/update/${id}` : '/consultation/store';
+
             $.ajax({
                 url: url,
                 method: 'POST',
@@ -450,7 +553,7 @@
             toast.text(message)
                 .css('background-color', type === 'success' ? '#28a745' : '#dc3545')
                 .fadeIn();
-            
+
             setTimeout(() => toast.fadeOut(), 3000);
         }
 
@@ -462,4 +565,5 @@
         });
     </script>
 </body>
-</html> 
+
+</html>

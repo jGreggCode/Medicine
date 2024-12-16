@@ -7,12 +7,12 @@ use App\Models\MedicineModel;
 class Dashboard extends BaseController
 {
     protected $session;
-    protected $medicineModel;
+    protected $consultationModel;
 
     public function __construct()
     {
         $this->session = \Config\Services::session();
-        $this->medicineModel = new MedicineModel();
+        $this->consultationModel = new \App\Models\ConsultationModel();
     }
 
     public function index()
@@ -22,12 +22,12 @@ class Dashboard extends BaseController
         }
 
         $data = [
-            'totalMedicines' => $this->medicineModel->getTotalMedicines(),
-            'totalStock' => $this->medicineModel->getTotalStock(),
-            'expiredMedicines' => $this->medicineModel->getExpiredCount(),
-            'medicines' => $this->medicineModel->findAll()
+            'activePatients' => $this->consultationModel->getActivePatients(),
+            'weeklyCases' => $this->consultationModel->getWeeklyCases(),
+            'totalRecords' => $this->consultationModel->getTotalRecords(),
+            'consultations' => $this->consultationModel->orderBy('visit_date', 'DESC')->findAll()
         ];
-        
+
         return view('dashboard/index', $data);
     }
-} 
+}

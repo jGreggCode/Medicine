@@ -7,11 +7,13 @@ use App\Models\UserModel;
 class Auth extends BaseController
 {
     protected $session;
+    protected $userModel;
 
     public function __construct()
     {
-        // Start session
         $this->session = \Config\Services::session();
+        $this->userModel = new UserModel();
+        helper(['form', 'url']);
     }
 
     public function login()
@@ -34,11 +36,30 @@ class Auth extends BaseController
 
     public function processLogin()
     {
-        $userModel = new UserModel();
+        $rules = [
+            'email' => 'required|valid_email',
+            'password' => 'required|min_length[6]'
+        ];
+
+        if (!$this->validate($rules)) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Invalid input data'
+            ]);
+        }
+
         $email = $this->request->getPost('email');
         $password = $this->request->getPost('password');
 
-        $user = $userModel->where('email', $email)->first();
+        $user = $this->userModel->where('email', $email)->first();
+
+        // Add debug logging
+        log_message('debug', 'Login attempt - Email: ' . $email);
+        log_message('debug', 'User found: ' . ($user ? 'Yes' : 'No'));
+
+        if ($user) {
+            log_message('debug', 'Password verification: ' . (password_verify($password, $user['password']) ? 'Success' : 'Failed'));
+        }
 
         if ($user && password_verify($password, $user['password'])) {
             $this->session->set([
@@ -47,7 +68,7 @@ class Auth extends BaseController
                 'email' => $user['email'],
                 'isLoggedIn' => true
             ]);
-            
+
             return $this->response->setJSON(['status' => 'success', 'message' => 'Login successful']);
         }
 
@@ -56,7 +77,6 @@ class Auth extends BaseController
 
     public function processRegister()
     {
-        $userModel = new UserModel();
         $rules = [
             'name' => 'required|min_length[3]',
             'email' => 'required|valid_email|is_unique[users.email]',
@@ -74,11 +94,16 @@ class Auth extends BaseController
         $data = [
             'name' => $this->request->getPost('name'),
             'email' => $this->request->getPost('email'),
-            'password' => password_hash($this->request->getPost('password'), PASSWORD_DEFAULT)
+            'password' => $this->request->getPost('password'),
+            'created_at' => date('Y-m-d H:i:s')
         ];
 
-        if ($userModel->insert($data)) {
-            return $this->response->setJSON(['status' => 'success', 'message' => 'Registration successful']);
+        try {
+            if ($this->userModel->insert($data)) {
+                return $this->response->setJSON(['status' => 'success', 'message' => 'Registration successful']);
+            }
+        } catch (\Exception $e) {
+            return $this->response->setJSON(['status' => 'error', 'message' => 'Registration failed: ' . $e->getMessage()]);
         }
 
         return $this->response->setJSON(['status' => 'error', 'message' => 'Registration failed']);
@@ -89,4 +114,15 @@ class Auth extends BaseController
         $this->session->destroy();
         return redirect()->to('/login');
     }
-} 
+
+    public function testConnection()
+    {
+        try {
+            $user = $this->userModel->first();
+            var_dump($user);
+            echo "Database connection successful";
+        } catch (\Exception $e) {
+            echo "Database error: " . $e->getMessage();
+        }
+    }
+}
